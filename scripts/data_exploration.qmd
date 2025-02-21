@@ -1,0 +1,29 @@
+---
+title: "Data Exploration"
+author: "Ellen Bledsoe"
+format: html
+editor: visual
+date: "`r Sys.Date()`"
+---
+
+## Data Exploration
+
+Explore the 4 CSV files from the Access Database.
+
+```{r}
+# List all CSV files in the folder
+csv_files <- list.files("../data/", pattern = "\\.csv$", full.names = TRUE)
+
+# Loop through each file
+for (file in csv_files) {
+  # Extract the filename without the .csv extension
+  file_name <- tools::file_path_sans_ext(basename(file))
+  
+  # Read the CSV file and assign it to a variable with the extracted name
+  assign(file_name, read.csv(file, stringsAsFactors = FALSE), envir = .GlobalEnv)
+}
+```
+
+### Questions
+
+In RodentDetail, multiple columns have numbers but no identifying information. This could be a factor of how they are being extracted from Access?

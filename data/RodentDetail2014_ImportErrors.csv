@@ -1,0 +1,12 @@
+Error,Field,Row
+Type Conversion Failure,ID,1
+Null value in an auto-number field,ID,1
+Type Conversion Failure,RodentSurveyID,1
+Type Conversion Failure,RodentSpeciesID,1
+Type Conversion Failure,SexID,1
+Type Conversion Failure,AgeID,1
+Type Conversion Failure,YearIDNumAssigned,1
+Type Conversion Failure,ReproductiveStatusID,1
+Type Conversion Failure,Weight,1
+Type Conversion Failure,Recapture,1
+Type Conversion Failure,CreatedDate,1

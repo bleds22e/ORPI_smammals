@@ -1,0 +1,47 @@
+---
+title: "Extract ORPI Data from Access DB"
+author: "Ellen Bledsoe"
+format: html
+editor: visual
+date: today
+---
+
+### Packages and Data
+
+Install and load packages needed.
+
+```{r}
+# install.packages("Hmisc")
+library(Hmisc)
+
+# bring in the data
+ORPI_data <- "../data/ORPIRodentSurveys.accdb"
+db <- mdb.get(ORPI_data)
+
+# Print the names of tables in the database
+mdb.get(ORPI_data, tables = TRUE)
+```
+
+### Check Data Tables
+
+```{r}
+db[["RodentDetail"]]
+db[["RodentDetail2014_ImportErrors"]]
+db[["RodentSurvey"]]
+db[["Site"]]
+```
+
+### Save as CSV Files
+
+Read through the data tables and save them as .csv files for later use.
+
+```{r}
+# # Write dataframes to csv
+df_names <- names(db)
+
+for (df in 1:length(db)) {
+  df_name <- df_names[df]
+  dataframe <- db[[df]]
+  readr::write_csv(dataframe, paste0("../data/", df_name, ".csv"))
+}
+```
