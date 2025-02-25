@@ -1,16 +1,26 @@
 ---
 title: "Data Exploration"
 author: "Ellen Bledsoe"
-format: html
+format: gfm
 editor: visual
 date: "`r Sys.Date()`"
 ---
 
 ## Data Exploration
 
+First, load packages
+
+```{r}
+#| message: false
+library(tidyverse)
+```
+
+### Read in Data Files
+
 Explore the 4 CSV files from the Access Database.
 
 ```{r}
+#| message: false
 # List all CSV files in the folder
 csv_files <- list.files("../data/", pattern = "\\.csv$", full.names = TRUE)
 
@@ -20,10 +30,87 @@ for (file in csv_files) {
   file_name <- tools::file_path_sans_ext(basename(file))
   
   # Read the CSV file and assign it to a variable with the extracted name
-  assign(file_name, read.csv(file, stringsAsFactors = FALSE), envir = .GlobalEnv)
+  assign(file_name, read_csv(file), envir = .GlobalEnv)
 }
 ```
 
-### Questions
+### Data Wrangling
 
-In RodentDetail, multiple columns have numbers but no identifying information. This could be a factor of how they are being extracted from Access?
+First, get only data from *C. baileyi*. Combine tables to get survey information and dates with the records on individual rodents.
+
+```{r}
+# get only C. baileyi records
+baileyi <- left_join(RodentDetail, tluRodentSpecies, 
+                     join_by(RodentSpeciesID == ID)) |> 
+  filter(SpeciesCode == "CHBA")
+
+# get survey dates and sites with the baileys data
+baileyi_surveys <- full_join(baileyi, RodentSurvey,
+                             join_by(RodentSurveyID == ID)) |> 
+  mutate(StartDate = ymd(StartDate),
+         EndDate = ymd(EndDate)) |> 
+  select(ID, RodentSurveyID, Recapture, SiteID:Quadrat)
+baileyi_surveys
+```
+
+Summarize the survey data by year
+
+```{r}
+survey_by_year <- RodentSurvey |> 
+  mutate(StartDate = ymd(StartDate),
+         EndDate = ymd(EndDate),
+         Year = year(EndDate),
+         Nights = EndDate - StartDate)
+
+trapnights_by_year <- survey_by_year |> 
+  mutate(TrapNights = NumTraps * Nights) |> 
+  group_by(Year) |> 
+  summarise(TrapNights = as.numeric(sum(TrapNights))) 
+
+trapnights_by_year
+```
+
+Determine the number of *C. baileyi* caught per year
+
+```{r}
+baileyi_year <- baileyi_surveys |> 
+  mutate(Year = year(EndDate)) |> 
+  group_by(Year) |> 
+  summarise(Recaps = n(),
+            NoRecaps = sum(Recapture == 0, na.rm = TRUE))
+
+baileyi_year
+```
+
+Calculate *C. bailyei* per trapnight per year
+
+```{r}
+baileyi_trapnight <- inner_join(baileyi_year, trapnights_by_year,
+                                join_by(Year)) |> 
+  mutate(CHBA_TrapNight = Recaps / TrapNights,
+         CHBA_TrapNight_NoRecaps = NoRecaps / TrapNights)
+
+baileyi_trapnight
+```
+
+### Plot *C. baileyi* Numbers
+
+Plots for number with and without including recaptures give similar results, so let's stick with no recaptures included
+
+#### *C. baileyi* individuals per year
+
+```{r}
+ggplot(baileyi_trapnight, aes(Year, NoRecaps)) +
+  geom_point() +
+  geom_line() +
+  theme_classic()
+```
+
+#### *C. baileyi* individuals per trap night
+
+```{r}
+ggplot(baileyi_trapnight, aes(Year, CHBA_TrapNight_NoRecaps)) +
+  geom_point() +
+  geom_line() +
+  theme_classic()
+```
