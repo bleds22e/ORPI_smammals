@@ -128,6 +128,7 @@ Rodent data from 1991-2008
 
 ```{r}
 #| message: false
+#| warning: false
 saguaro_rodents <- read_csv("../data/SaguaroNP/saguaro_rodents.csv", 
                             skip = 5, col_names = TRUE) |> 
   slice(-1)
@@ -153,6 +154,7 @@ trap_nights <- saguaro_rodents |>
 
 Summarize baileys
 ```{r}
+#| message: false
 CHBA_per_trapnight <- saguaro_rodents |> 
   filter(Species == "Chaetodipus baileyi", 
          `Recapture?` == "N") |> 
@@ -162,6 +164,8 @@ CHBA_per_trapnight <- saguaro_rodents |>
   left_join(trap_nights) |> 
   mutate(trap_nights = nights * 148, # 148 traps in web design each night
          CHBA_per_trapnight = abund/trap_nights) 
+
+CHBA_per_trapnight
 ```
 
 ### Plotting
@@ -179,6 +183,9 @@ sagu
 ## Compare ORPI and SAGU _C. baileyi_ Data
 
 ```{r}
+#| warning: false
+# use patchwork to build the multi-plot
+# & scale_x_continuous aligns the values on the x-axis for easier comparison
 orpi / sagu & scale_x_continuous(limits = c(1990, 2022))
 ```
 

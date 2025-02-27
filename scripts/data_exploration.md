@@ -193,11 +193,6 @@ saguaro_rodents <- read_csv("../data/SaguaroNP/saguaro_rodents.csv",
   slice(-1)
 ```
 
-    Warning: One or more parsing issues, call `problems()` on your data frame for details,
-    e.g.:
-      dat <- vroom(...)
-      problems(dat)
-
 Get data “cleaned” up
 
 ``` r
@@ -228,9 +223,31 @@ CHBA_per_trapnight <- saguaro_rodents |>
   left_join(trap_nights) |> 
   mutate(trap_nights = nights * 148, # 148 traps in web design each night
          CHBA_per_trapnight = abund/trap_nights) 
+
+CHBA_per_trapnight
 ```
 
-    Joining with `by = join_by(Year)`
+    # A tibble: 18 × 5
+        Year abund nights trap_nights CHBA_per_trapnight
+       <dbl> <int>  <int>       <dbl>              <dbl>
+     1  1991     1      2         296            0.00338
+     2  1992    14      2         296            0.0473 
+     3  1993    22      2         296            0.0743 
+     4  1994    34      2         296            0.115  
+     5  1995     9      2         296            0.0304 
+     6  1996    15      2         296            0.0507 
+     7  1997    13      2         296            0.0439 
+     8  1998    10      2         296            0.0338 
+     9  1999    31      2         296            0.105  
+    10  2000     5      2         296            0.0169 
+    11  2001     7      2         296            0.0236 
+    12  2002     8      2         296            0.0270 
+    13  2003    17      2         296            0.0574 
+    14  2004    46      2         296            0.155  
+    15  2005    54      2         296            0.182  
+    16  2006    23      1         148            0.155  
+    17  2007    50      2         296            0.169  
+    18  2008    14      2         296            0.0473 
 
 ### Plotting
 
@@ -249,13 +266,9 @@ sagu
 ## Compare ORPI and SAGU *C. baileyi* Data
 
 ``` r
+# use patchwork to build the multi-plot
+# & scale_x_continuous aligns the values on the x-axis for easier comparison
 orpi / sagu & scale_x_continuous(limits = c(1990, 2022))
 ```
-
-    Warning: Removed 1 row containing missing values or values outside the scale range
-    (`geom_point()`).
-
-    Warning: Removed 1 row containing missing values or values outside the scale range
-    (`geom_line()`).
 
 ![](data_exploration_files/figure-commonmark/unnamed-chunk-14-1.png)
