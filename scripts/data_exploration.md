@@ -1,14 +1,17 @@
 # Data Exploration
 Ellen Bledsoe
-2025-02-25
+2025-02-27
 
-## Data Exploration
+# Data Exploration
 
 First, load packages
 
 ``` r
 library(tidyverse)
+library(patchwork)
 ```
+
+## Organ Pipe NM
 
 ### Read in Data Files
 
@@ -167,10 +170,92 @@ ggplot(baileyi_trapnight, aes(Year, NoRecaps)) +
 #### *C. baileyi* individuals per trap night
 
 ``` r
-ggplot(baileyi_trapnight, aes(Year, CHBA_TrapNight_NoRecaps)) +
+orpi <- ggplot(baileyi_trapnight, aes(Year, CHBA_TrapNight_NoRecaps)) +
   geom_point() +
   geom_line() +
+  labs(title = "C. baileyi in Organ Pipe NM",
+       y = "C. baileyi per trapnight") +
   theme_classic()
+orpi
 ```
 
 ![](data_exploration_files/figure-commonmark/unnamed-chunk-8-1.png)
+
+## Saguaro NP
+
+### Read in Data
+
+Rodent data from 1991-2008
+
+``` r
+saguaro_rodents <- read_csv("../data/SaguaroNP/saguaro_rodents.csv", 
+                            skip = 5, col_names = TRUE) |> 
+  slice(-1)
+```
+
+    Warning: One or more parsing issues, call `problems()` on your data frame for details,
+    e.g.:
+      dat <- vroom(...)
+      problems(dat)
+
+Get data “cleaned” up
+
+``` r
+saguaro_rodents <- saguaro_rodents |> 
+  mutate(Date = dmy(`Trap Check Date`),
+         Year = year(Date),
+         `Recapture?` = toupper(`Recapture?`))
+```
+
+Check number of trapping events per year
+
+``` r
+trap_nights <- saguaro_rodents |> 
+  group_by(Year) |> 
+  distinct(Date) |> 
+  summarise(nights = n()) 
+```
+
+Summarize baileys
+
+``` r
+CHBA_per_trapnight <- saguaro_rodents |> 
+  filter(Species == "Chaetodipus baileyi", 
+         `Recapture?` == "N") |> 
+  group_by(Year) |> 
+  summarise(abund = n()) |> 
+  # calculate baileys per trap night
+  left_join(trap_nights) |> 
+  mutate(trap_nights = nights * 148, # 148 traps in web design each night
+         CHBA_per_trapnight = abund/trap_nights) 
+```
+
+    Joining with `by = join_by(Year)`
+
+### Plotting
+
+``` r
+sagu <- ggplot(CHBA_per_trapnight, aes(Year, CHBA_per_trapnight)) +
+  geom_point() +
+  geom_line() +
+    labs(title = "C. baileyi in Saguaro National Park",
+       y = "C. baileyi per trapnight") +
+  theme_classic()
+sagu
+```
+
+![](data_exploration_files/figure-commonmark/unnamed-chunk-13-1.png)
+
+## Compare ORPI and SAGU *C. baileyi* Data
+
+``` r
+orpi / sagu & scale_x_continuous(limits = c(1990, 2022))
+```
+
+    Warning: Removed 1 row containing missing values or values outside the scale range
+    (`geom_point()`).
+
+    Warning: Removed 1 row containing missing values or values outside the scale range
+    (`geom_line()`).
+
+![](data_exploration_files/figure-commonmark/unnamed-chunk-14-1.png)
