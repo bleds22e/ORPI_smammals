@@ -120,6 +120,7 @@ orpi <- ggplot(baileyi_trapnight, aes(Year, CHBA_TrapNight_NoRecaps)) +
   theme_classic()
 orpi
 ```
+
 ## Saguaro NP
 
 ### Read in Data
@@ -153,6 +154,7 @@ trap_nights <- saguaro_rodents |>
 ```
 
 Summarize baileys
+
 ```{r}
 #| message: false
 CHBA_per_trapnight <- saguaro_rodents |> 
@@ -180,7 +182,7 @@ sagu <- ggplot(CHBA_per_trapnight, aes(Year, CHBA_per_trapnight)) +
 sagu
 ```
 
-## Compare ORPI and SAGU _C. baileyi_ Data
+## Compare ORPI and SAGU *C. baileyi* Data
 
 ```{r}
 #| warning: false
@@ -188,4 +190,3 @@ sagu
 # & scale_x_continuous aligns the values on the x-axis for easier comparison
 orpi / sagu & scale_x_continuous(limits = c(1990, 2022))
 ```
-
